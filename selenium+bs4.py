@@ -18,14 +18,14 @@ def scroll_to_bottom(driver, elem) -> None:
         return
     scroll_to_bottom(driver, new_elem)
 
-
+t0 = time.time()
 path = "C:/Users/User/Documents/Python/chromedriver-win64/chromedriver"
 driver = webdriver.Chrome(path)
 #driver = webdriver.Chrome(ChromeDriverManager().install())
 
 #driver.get("https://yandex.ru/maps/org/gazpromneft/222337486264")
-#driver.get("https://yandex.ru/maps/org/ozon/36180355772")
-driver.get("https://yandex.ru/maps/org/ozon/135299984189")
+driver.get("https://yandex.ru/maps/org/ozon/36180355772")
+#driver.get("https://yandex.ru/maps/org/ozon/135299984189")
 
 reviews_button = driver.find_element(By.CSS_SELECTOR, "div.tabs-select-view__title._name_reviews")
 n_reviews = int(reviews_button.text.split('\n')[1])
@@ -39,13 +39,16 @@ page_content = driver.page_source
 
 # 'html.parser' or 'lxml'
 soup = BeautifulSoup(page_content, 'html.parser')
-
+t1 = time.time()
 reviews_data = soup.find_all('span', {'class': 'business-review-view__body-text'})
 time_data = soup.find_all('span', {'class': 'business-review-view__body-text'})
-
+t2 = time.time()
+print(t2-t1)
 reviews = [data.getText() for data in reviews_data]
 
 print(len(reviews))
 print(reviews)
 
 driver.close()
+tf = time.time()
+print(tf-t0)
