@@ -7,13 +7,23 @@ from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 
 
-def scroll_down(driver, n):
+def scroll_to_element(driver, element):
+    driver.execute_script("arguments[0].scrollIntoView();", element)
+    return driver
+
+
+def scroll_list(driver):
+    list_end = driver.find_elements(By.CLASS_NAME, 'add-business-view')
     elements = driver.find_elements(By.CSS_SELECTOR, "li.search-snippet-view")
-    while len(elements) < n:
-        driver.execute_script("arguments[0].scrollIntoView();", elements[-1])
+    while len(list_end) == 0 and len(elements) < 1000:
+        driver = scroll_to_element(driver, elements[-1])
         time.sleep(0.25)
         elements = driver.find_elements(By.CSS_SELECTOR, "li.search-snippet-view")
-        #print(len(elements))
+        list_end = driver.find_elements(By.CLASS_NAME, 'add-business-view')
+        print(len(elements))
+    driver = scroll_to_element(driver, elements[-1])
+    time.sleep(1)
+    elements = driver.find_elements(By.CSS_SELECTOR, "li.search-snippet-view")
     return elements
 
 
@@ -71,16 +81,16 @@ def get_point_data(element):
 def get_points_data(driver):
 
     link = "https://yandex.ru/maps/2/saint-petersburg/chain/ozon_punkty_vydachi/4550240290/"
+    #link = "https://yandex.ru/maps/2/saint-petersburg/chain/joy_pizza/16470329024"
+    #link = "https://yandex.ru/maps/2/saint-petersburg/chain/pochta_rossii/675976769"
     driver.get(link)
+    time.sleep(3)
 
-    points_data = ['id', 'link', 'coordinates', 'address', 'stars']
+    points_data = [['id', 'link', 'coordinates', 'address', 'stars']]
 
-    t0 = time.time()
     t1 = time.time()
-    elements = scroll_down(driver, 1000)
+    elements = scroll_list(driver)
     t2 = time.time()
-    #elements = driver.find_elements(By.CSS_SELECTOR, "li.search-snippet-view")
-    t3 = time.time()
 
     for element in elements:
         #tss = time.time()
@@ -88,8 +98,8 @@ def get_points_data(driver):
         #tff = time.time()
         #print(tff-tss)
         points_data.append(data)
-    t4 = time.time()
-    print(t1 - t0, t2 - t1, t3 - t2, t4 - t3)
+    t3 = time.time()
+    print(t2 - t1, t3 - t2)
 
     return points_data
 
@@ -102,12 +112,12 @@ ts = time.time()
 points_data = get_points_data(driver)
 tf = time.time()
 print(tf-ts)
-
+"""
 for data in points_data:
     print(data)
-
+"""
 print(len(points_data))
 driver.close()
 
-with open('points.csv', 'w', newline='') as file:
+with open('points.csv', 'w', newline='', encoding='utf-8') as file:
     csv.writer(file).writerows(points_data)
